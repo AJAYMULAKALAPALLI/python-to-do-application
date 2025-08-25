@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask To-Do List</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+
+        header h1 i {
+            color: #667eea;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 1.1rem;
+        }
+
+        /* Add task section */
+        .add-task-section {
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 50px;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-group button {
+            padding: 15px 25px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .input-group button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Stats section */
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(45deg, #f7fafc, #edf2f7);
+            border-radius: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            display: block;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #718096;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Tasks section */
+        .tasks-list {
+            list-style: none;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            margin-bottom: 15px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            border-left: 4px solid #667eea;
+        }
+
+        .task-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .task-item.completed {
+            opacity: 0.7;
+            border-left-color: #48bb78;
+        }
+
+        .task-item.completed .task-title {
+            text-decoration: line-through;
+            color: #718096;
+        }
+
+        .task-content {
+            display: flex;
+            align-items: center;
+            flex: 1;
+            gap: 15px;
+        }
+
+        .task-checkbox .toggle-btn {
+            color: #667eea;
+            font-size: 1.5rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .task-checkbox .toggle-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .task-item.completed .toggle-btn {
+            color: #48bb78;
+        }
+
+        .task-text {
+            flex: 1;
+        }
+
+        .task-title {
+            display: block;
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .task-date {
+            color: #a0aec0;
+            font-size: 0.85rem;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .edit-btn, .delete-btn {
+            background: none;
+            border: none;
+            padding: 8px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #718096;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .edit-btn:hover {
+            background: #4299e1;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .delete-btn:hover {
+            background: #f56565;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        /* Edit form */
+        .edit-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex: 1;
+        }
+
+        .edit-form input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .save-btn, .cancel-btn {
+            background: none;
+            border: none;
+            padding: 8px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #718096;
+        }
+
+        .save-btn:hover {
+            background: #48bb78;
+            color: white;
+        }
+
+        .cancel-btn:hover {
+            background: #f56565;
+            color: white;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #a0aec0;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #e2e8f0;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #718096;
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s ease forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .task-item {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .loading {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 20px;
+            }
+            
+            header h1 {
+                font-size: 2rem;
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+            
+            .input-group button {
+                width: 100%;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .task-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .task-content {
+                width: 100%;
+            }
+            
+            .task-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-tasks"></i> My To-Do List</h1>
+            <p class="subtitle">Stay organized and productive</p>
+        </header>
+
+        <!-- Add new task form -->
+        <div class="add-task-section">
+            <form method="POST" action="{{ url_for('add_task') }}" class="add-form">
+                <div class="input-group">
+                    <input type="text" name="task" placeholder="What needs to be done?" required>
+                    <button type="submit"><i class="fas fa-plus"></i> Add Task</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tasks statistics -->
+        <div class="stats">
+            <div class="stat-item">
+                <span class="stat-number">{{ tasks|length }}</span>
+                <span class="stat-label">Total</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">{{ tasks|selectattr('completed', 'equalto', false)|list|length }}</span>
+                <span class="stat-label">Pending</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">{{ tasks|selectattr('completed', 'equalto', true)|list|length }}</span>
+                <span class="stat-label">Completed</span>
+            </div>
+        </div>
+
+        <!-- Tasks list -->
+        <div class="tasks-section">
+            {% if tasks %}
+                <ul class="tasks-list">
+                    {% for task in tasks %}
+                    <li class="task-item {% if task.completed %}completed{% endif %}">
+                        <div class="task-content">
+                            <div class="task-checkbox">
+                                <a href="{{ url_for('toggle_task', task_id=task.id) }}" class="toggle-btn">
+                                    {% if task.completed %}
+                                        <i class="fas fa-check-circle"></i>
+                                    {% else %}
+                                        <i class="far fa-circle"></i>
+                                    {% endif %}
+                                </a>
+                            </div>
+                            
+                            <div class="task-text" id="task-text-{{ task.id }}">
+                                <span class="task-title">{{ task.text }}</span>
+                                <small class="task-date">Created: {{ task.created_at }}</small>
+                            </div>
+                            
+                            <div class="task-edit" id="task-edit-{{ task.id }}" style="display: none;">
+                                <form method="POST" action="{{ url_for('edit_task', task_id=task.id) }}" class="edit-form">
+                                    <input type="text" name="task" value="{{ task.text }}" required>
+                                    <button type="submit" class="save-btn"><i class="fas fa-check"></i></button>
+                                    <button type="button" class="cancel-btn" onclick="cancelEdit({{ task.id }})">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div class="task-actions">
+                            <button class="edit-btn" onclick="editTask({{ task.id }})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <a href="{{ url_for('delete_task', task_id=task.id) }}" 
+                               class="delete-btn" 
+                               onclick="return confirm('Are you sure you want to delete this task?')">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-clipboard-list"></i>
+                    <h3>No tasks yet</h3>
+                    <p>Add your first task to get started!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Edit task functionality
+        function editTask(taskId) {
+            // Hide task text and show edit form
+            document.getElementById(`task-text-${taskId}`).style.display = 'none';
+            document.getElementById(`task-edit-${taskId}`).style.display = 'flex';
+            
+            // Focus on the input field
+            const input = document.querySelector(`#task-edit-${taskId} input`);
+            input.focus();
+            input.select();
+        }
+
+        function cancelEdit(taskId) {
+            // Show task text and hide edit form
+            document.getElementById(`task-text-${taskId}`).style.display = 'block';
+            document.getElementById(`task-edit-${taskId}`).style.display = 'none';
+        }
+
+        // Add some interactive feedback
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add animation to new tasks
+            const taskItems = document.querySelectorAll('.task-item');
+            taskItems.forEach((item, index) => {
+                item.style.animationDelay = `${index * 0.1}s`;
+                item.classList.add('fade-in');
+            });
+            
+            // Handle form submission with Enter key
+            const addTaskInput = document.querySelector('input[name="task"]');
+            if (addTaskInput) {
+                addTaskInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.target.closest('form').submit();
+                    }
+                });
+            }
+            
+            // Handle edit form submissions with Enter key
+            const editInputs = document.querySelectorAll('.edit-form input');
+            editInputs.forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.target.closest('form').submit();
+                    } else if (e.key === 'Escape') {
+                        const taskId = e.target.closest('.task-item').querySelector('[onclick*="cancelEdit"]').onclick.toString().match(/\d+/)[0];
+                        cancelEdit(parseInt(taskId));
+                    }
+                });
+            });
+            
+            // Add loading state to buttons
+            const buttons = document.querySelectorAll('button, .toggle-btn, .delete-btn');
+            buttons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Add a subtle loading effect
+                    this.style.opacity = '0.7';
+                    setTimeout(() => {
+                        this.style.opacity = '1';
+                    }, 200);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
